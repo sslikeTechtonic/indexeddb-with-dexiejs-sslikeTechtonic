@@ -3,10 +3,11 @@ let initialTable = true;
 async function populateTableUI(newBookTitle) {
   const tBody = document.querySelector('tbody');
   const columns = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
-  
+
   if (initialTable) {
     let allBooks = await db.books.where('numberOfPages').aboveOrEqual(0).toArray()
-    
+    console.log(allBooks.length);
+
     for (let i = allBooks.length - 1; i >= 0; i--) {
       const row = document.createElement('tr');
 
@@ -35,12 +36,12 @@ async function populateTableUI(newBookTitle) {
       td.innerText = value ? value : null;
       row.append(td);
     }
-    
+
     // creates a delete button with no functionality
     const deleteBtn = document.createElement('button');
     deleteBtn.innerText = 'delete book';
     row.append(deleteBtn)
-    
+
     tBody.append(row);
   }
   initialTable = false;
