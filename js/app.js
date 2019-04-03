@@ -4,6 +4,7 @@ function onDatabaseReady() {
     console.log(db);
     document.querySelector('form').addEventListener('submit', function(e){
       e.preventDefault();
+      console.log(e);
       var myObj = {}
       console.log(e.target.length);
       for (var i = 0; i < e.target.length-1; i++) {
@@ -38,7 +39,6 @@ var samBook = {
 
 function addBook(event) {
     var addedBook = db.books.put(event);
-
     // Hint: Once you've added the book to your database, call populateTableUI with the added book's title
     // Check out the Table.put() method and what it returns at: https://dexie.org/docs/Table/Table.put()
     addedBook.then(function(resolved){
@@ -53,15 +53,30 @@ function addBook(event) {
 
 
 
-function editBook(event, obj) {
-  var updatedBook = db.books.update(event, obj)
+function editBook(event) {
+  const keys = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
+  confirm(`Do you want to edit ${event.title}?`);
+  if(confirm){
+    let editKey = prompt('Which field do you want to edit?');
+      if(!keys.includes(editKey)){
+        console.log('hello');
+        alert(`Error!!! Please enter one of the following fields to edit: cover, title, author, numberOfPages, synopsis, publishDate, or rating. Thanks!`);
+      } else {
+        let edits = prompt('What edits do you want to make?');
+        var obj = {[editKey]: edits};
+      }
+  }
+  var updatedBook = db.books.update(event.title, obj)
 
   updatedBook.then(function(resolved){
     console.log(resolved);
   }).catch(function(rejected){
     console.log(rejected);
   });
+
+  populateTableUI()
 }
+
 
 
 // ************ 4. (BONUS) Comment out line 67 in ../index.HTML and write your own 'populateTableUI' function in app.js ************
@@ -70,27 +85,45 @@ async function populateTableUI(){
   let tbody = document.querySelector('tbody');
   tbody.innerHTML = '';
   let books = await db.books.toArray();
-  // let columns = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
+  let columns = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
   console.log(books.length);
   for (var i = 0; i < books.length; i++) {
     var row = document.createElement('tr');
-    for (var key in books[i]) {
+    for (let j = 0; j < columns.length; j++) {
       var td = document.createElement('td');
-      var words = document.createTextNode(books[i][key]);
-      td.append(words)
+      td.contentEditable = "true";
+      // td.addEventListener('input', function(e){
+      //   console.log(e);
+      // });
+      var value = books[i][columns[j]]
+      td.innerText = value ? value : null;
       row.append(td);
     }
       let btn = document.createElement('button');
-      btn.innerText = 'DeleteMe';
+      btn.innerText = 'Delete Me';
       btn.className = 'deleteBtn';
       btn.dataset.title = books[i].title;
       btn.addEventListener('click', function(e){
         deleteBook(e);
       })
+      let btnEdit = document.createElement('button');
+      btnEdit.innerText = 'Edit Me';
+      btnEdit.className = 'editBtn';
+      btnEdit.dataset.title = books[i].title;
+      btnEdit.addEventListener('click', function(e){
+        var targetBook = db.books.get(e.target.dataset.title);
+        targetBook.then(function(resolved){
+          editBook(resolved);
+        }).catch(function(rejected){
+          console.log(rejected);
+        });
+      });
+      row.append(btnEdit)
       row.append(btn)
       tbody.append(row);
   }
 }
+
 
 
 // Now that you’ve cloned your project lets start by testing our code. Let's start live
