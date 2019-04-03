@@ -6,8 +6,21 @@ form {
 table.table.table-striped{
   width: 80vw;
   margin:auto;
+  /* color:#42f4ad; */
 }
 
 h1 {
   text-align:center;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+button {
+  color: black;
 }
