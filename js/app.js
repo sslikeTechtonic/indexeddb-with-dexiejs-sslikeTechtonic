@@ -1,18 +1,15 @@
 function onDatabaseReady() {
-    populateTableUI() // DO NOT TOUCH THIS LINE until step #4
 
-    console.log(db);
+    populateTableUI() // DO NOT TOUCH THIS LINE until step #4
+    alert('Hello! To edit fields, click into the desired field add your edits and hit enter.')
     document.querySelector('form').addEventListener('submit', function(e){
       e.preventDefault();
-      console.log(e);
       var myObj = {}
-      console.log(e.target.length);
       for (var i = 0; i < e.target.length-1; i++) {
         myObj[e.target[i].name] = e.target[i].value
       }
       addBook(myObj);
     });
-
     // DexieJS docs: https://dexie.org/
 }
 
@@ -53,20 +50,35 @@ function addBook(event) {
 
 
 
-function editBook(event) {
-  const keys = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
-  confirm(`Do you want to edit ${event.title}?`);
-  if(confirm){
-    let editKey = prompt('Which field do you want to edit?');
-      if(!keys.includes(editKey)){
-        console.log('hello');
-        alert(`Error!!! Please enter one of the following fields to edit: cover, title, author, numberOfPages, synopsis, publishDate, or rating. Thanks!`);
-      } else {
-        let edits = prompt('What edits do you want to make?');
-        var obj = {[editKey]: edits};
-      }
-  }
-  var updatedBook = db.books.update(event.title, obj)
+function editBook(event, obj) {
+
+  // const keys = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
+  //
+  // var con = confirm(`Do you want to edit ${event.title}?`);
+  //
+  // if(con){
+  //   let editKey = prompt('Which field do you want to edit?');
+  //     if(!keys.includes(editKey)){
+  //       alert(`Error!!! Please enter one of the following fields to edit: cover, title, author, numberOfPages, synopsis, publishDate, or rating. Thanks!`);
+  //     } else {
+  //       let edits = prompt('What edits do you want to make?');
+  //       var obj = {[editKey]: edits};
+
+          // var updatedBook = db.books.update(event, obj)
+          //
+          // updatedBook.then(function(resolved){
+          //   console.log(resolved);
+          // }).catch(function(rejected){
+          //   console.log(rejected);
+          // });
+          //
+          // populateTableUI()
+  //     }
+  // } else if(!con) {
+  //   return;
+
+
+  var updatedBook = db.books.update(event, obj)
 
   updatedBook.then(function(resolved){
     console.log(resolved);
@@ -92,11 +104,20 @@ async function populateTableUI(){
     for (let j = 0; j < columns.length; j++) {
       var td = document.createElement('td');
       td.contentEditable = "true";
-      // td.addEventListener('input', function(e){
-      //   console.log(e);
-      // });
-      var value = books[i][columns[j]]
+      td.className = 'tdStuff';
+      var value = books[i][columns[j]];
+      td.dataset.value = value ? value : null;
+      td.dataset.key = columns[j];
       td.innerText = value ? value : null;
+      td.dataset.title = books[i].title
+      td.addEventListener("keydown", function(e) {
+        if (event.key === "Enter") {
+        event.preventDefault();
+        var newObj = {[e.target.dataset.key]: e.target.innerHTML}
+        console.log(newObj);
+        editBook(e.target.dataset.title, newObj);
+      }
+      });
       row.append(td);
     }
       let btn = document.createElement('button');
@@ -106,19 +127,19 @@ async function populateTableUI(){
       btn.addEventListener('click', function(e){
         deleteBook(e);
       })
-      let btnEdit = document.createElement('button');
-      btnEdit.innerText = 'Edit Me';
-      btnEdit.className = 'editBtn';
-      btnEdit.dataset.title = books[i].title;
-      btnEdit.addEventListener('click', function(e){
-        var targetBook = db.books.get(e.target.dataset.title);
-        targetBook.then(function(resolved){
-          editBook(resolved);
-        }).catch(function(rejected){
-          console.log(rejected);
-        });
-      });
-      row.append(btnEdit)
+      // let btnEdit = document.createElement('button');
+      // btnEdit.innerText = 'Edit Me';
+      // btnEdit.className = 'editBtn';
+      // btnEdit.dataset.title = books[i].title;
+      // btnEdit.addEventListener('click', function(e){
+      //   var targetBook = db.books.get(e.target.dataset.title);
+      //   targetBook.then(function(resolved){
+      //     editBook(resolved);
+      //   }).catch(function(rejected){
+      //     console.log(rejected);
+      //   });
+      // });
+      // row.append(btnEdit)
       row.append(btn)
       tbody.append(row);
   }
